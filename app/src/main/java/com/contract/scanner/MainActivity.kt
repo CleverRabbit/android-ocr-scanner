@@ -9,6 +9,7 @@ import android.util.Log
 import android.util.Size
 import android.view.View
 import android.widget.Toast
+import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -27,24 +28,24 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var preferences: AppPreferences
-    
+
     private var cameraProvider: ProcessCameraProvider? = null
     private var imageAnalysis: ImageAnalysis? = null
     private var preview: Preview? = null
     private var camera: Camera? = null
-    
+
     private val textRecognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
     private val executor: ExecutorService by lazy { Executors.newSingleThreadExecutor() }
-    
+
     // Regex pattern for contract number detection (e.g., № 123/456, №123, etc.)
-    private val contractPattern = Regex("""№\s*\d+/?\d*""")
-    
+    private val contractPattern = Regex("""\d+/?\d*""")
+
     // Stabilization: track last detected numbers to avoid flickering
     private val recentDetections = mutableSetOf<String>()
     private var stableContractNumber: String? = null
     private var detectionCount = 0
-    private val stabilizationThreshold = 3
-    
+    private val stabilizationThreshold = 1
+
     companion object {
         private const val TAG = "ContractScanner"
         private const val REQUEST_CODE_PERMISSIONS = 10
@@ -55,11 +56,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        
+
         preferences = AppPreferences(this)
-        
+
         setupUI()
-        
+
         if (allPermissionsGranted()) {
             startCamera()
         } else {
@@ -75,7 +76,7 @@ class MainActivity : AppCompatActivity() {
         binding.settingsButton.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
-        
+
         binding.openButton.setOnClickListener {
             stableContractNumber?.let { number ->
                 openBrowser(number)
@@ -109,7 +110,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun startCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
-        
+
         cameraProviderFuture.addListener({
             try {
                 cameraProvider = cameraProviderFuture.get()
@@ -122,12 +123,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun bindCameraUseCases() {
         val cameraProvider = cameraProvider ?: return
-        
+
         // Preview use case
         preview = Preview.Builder().build().also {
             it.setSurfaceProvider(binding.previewView.surfaceProvider)
         }
-        
+
         // Image Analysis use case for OCR
         imageAnalysis = ImageAnalysis.Builder()
             .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
@@ -138,10 +139,10 @@ class MainActivity : AppCompatActivity() {
                     processImageProxy(imageProxy)
                 }
             }
-        
+
         // Select back camera
         val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-        
+
         try {
             cameraProvider.unbindAll()
             camera = cameraProvider.bindToLifecycle(
@@ -155,11 +156,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @OptIn(ExperimentalGetImage::class)
     private fun processImageProxy(imageProxy: ImageProxy) {
         val mediaImage = imageProxy.image ?: return
-        
+
         val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
-        
+
         textRecognizer.process(image)
             .addOnSuccessListener { visionText ->
                 handleTextRecognition(visionText.text)
@@ -176,7 +178,7 @@ class MainActivity : AppCompatActivity() {
         val lines = text.split("\n")
         var foundContract: String? = null
         var foundBoundingBoxes: List<android.graphics.Rect> = emptyList()
-        
+
         for (line in lines) {
             val match = contractPattern.find(line)
             if (match != null) {
@@ -184,7 +186,7 @@ class MainActivity : AppCompatActivity() {
                 break
             }
         }
-        
+
         runOnUiThread {
             updateUI(foundContract, emptyList())
         }
@@ -194,17 +196,17 @@ class MainActivity : AppCompatActivity() {
         if (contractNumber != null) {
             // Add to recent detections for stabilization
             recentDetections.add(contractNumber)
-            
+
             // Check if we have a stable detection
             if (recentDetections.count { it == contractNumber } >= stabilizationThreshold) {
                 stableContractNumber = contractNumber
                 detectionCount = 0
-                
+
                 // Update UI
                 binding.contractNumberText.text = getString(R.string.contract_number, contractNumber)
                 binding.openButton.isEnabled = true
                 binding.statusText.text = getString(R.string.contract_number, contractNumber)
-                
+
                 // Auto-open if enabled
                 if (preferences.autoOpen) {
                     openBrowser(contractNumber)
@@ -222,7 +224,7 @@ class MainActivity : AppCompatActivity() {
             binding.statusText.text = getString(R.string.scanning)
             binding.cameraOverlay.clearBoxes()
         }
-        
+
         // Limit recent detections size
         if (recentDetections.size > 10) {
             recentDetections.clear()
@@ -232,7 +234,7 @@ class MainActivity : AppCompatActivity() {
     private fun openBrowser(contractNumber: String) {
         val urlTemplate = preferences.urlTemplate
         val url = urlTemplate.replace("{NUMBER}", Uri.encode(contractNumber))
-        
+
         try {
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
             startActivity(intent)
