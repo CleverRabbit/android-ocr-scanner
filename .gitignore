@@ -1,0 +1,71 @@
+```
+# Android build outputs
+build/
+.gradle/
+*/build/
+
+# APK and AAB files
+*.apk
+*.aab
+
+# Local configuration file (sdk path, signing keys, etc.)
+local.properties
+
+# Android Studio navigation editor temp files
+.navigation/
+
+# Android Studio profiler temp files
+.capture/
+
+# Unit test results
+test-results/
+
+# Version control system files
+.vcs/
+
+# Gradle cache
+.gradle/
+
+# Android cache
+.cache/
+
+# IDE files
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Log files
+*.log
+
+# Environment files
+.env
+.env.local
+*.env.*
+
+# Temporary files
+*.tmp
+*.temp
+*~
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Coverage reports
+coverage/
+*.gcov
+*.lcov
+*.profdata
+
+# Python related (if any Python scripts in project)
+__pycache__/
+*.pyc
+*.pyo
+.Python
+pip-log.txt
+.tox/
+.coverage
+.coverage.*
+nosetests.xml
+```

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Contract Scanner</string>
+    <string name="settings">Настройки</string>
+    <string name="contract_number">Номер договора: %s</string>
+    <string name="open_button">Открыть</string>
+    <string name="scanning">Сканирование…</string>
+    <string name="no_contract">Договор не найден</string>
+    <string name="url_template_label">Шаблон ссылки</string>
+    <string name="url_template_hint">https://mysite.ru/contract/{NUMBER}</string>
+    <string name="auto_open_label">Авто-открытие</string>
+    <string name="auto_open_desc">Автоматически открывать браузер при обнаружении</string>
+    <string name="save_settings">Сохранить</string>
+    <string name="permission_required">Требуется разрешение на использование камеры</string>
+    <string name="grant_permission">Разрешить</string>
+</resources>
