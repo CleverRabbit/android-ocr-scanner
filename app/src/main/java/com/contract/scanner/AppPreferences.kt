@@ -2,7 +2,7 @@ package com.contract.scanner
 
 import android.content.Context
 import android.content.SharedPreferences
-import androidx.preference.PreferenceManager
+import android.preference.PreferenceManager
 
 /**
  * Helper class for managing app settings using SharedPreferences
@@ -15,7 +15,7 @@ class AppPreferences(context: Context) {
         private const val KEY_URL_TEMPLATE = "url_template"
         private const val KEY_AUTO_OPEN = "auto_open"
         
-        const val DEFAULT_URL_TEMPLATE = "https://mysite.ru/contract/{NUMBER}"
+        const val DEFAULT_URL_TEMPLATE = "https://order.matrixhome.net/social/family/view/{NUMBER}"
     }
 
     var urlTemplate: String
